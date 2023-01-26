@@ -1,3 +1,17 @@
+# Functions
+Contained in f_measurements.py
+- Geometry tools
+- Image processing tools
+- Face landmark generation
+- Interactive plotting of face landmarks
+- Measurements from face landmarks
+- Draw landmarks features
+- Screen printing information
+- Main function
+
+
+
+# Product requirements
 
 Sucess criteria:
 1. The client is centered, in the middle of the photo
@@ -20,5 +34,5 @@ Solution:
 8. Screen instructions. Photo taken directly from the application - which prevents cropping or unoriginal photos.
 
 
-More ideas:
+# Future work and ideas
 1. Detecting ears to ensure that the right and left sides of the client are symmetrical.
