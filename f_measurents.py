@@ -127,14 +127,10 @@ face_mesh = mp_face_mesh.FaceMesh(
 
 
 def face_mesh_points(image):
-    
     result = face_mesh.process(image)
     height, width = height_width_image(image)
-
     face = result.multi_face_landmarks
-
     NoneType = type(None)
-
     if isinstance(face, NoneType):
         return None, image
     mesh_points= np.array([np.multiply([p.x, p.y], [width, height]).astype(int) for p in result.multi_face_landmarks[0].landmark])
@@ -343,12 +339,20 @@ def screenprint_top_to_bottom_angle(image, top_to_bottom_angle, top_to_bottom_an
     image = cv2.putText(image, f'top_to_bottom_angle: {str(round(top_to_bottom_angle,3))} [degrees]', (int(x_position_0),int(y_position_v[0])), cv2.FONT_HERSHEY_PLAIN, font_scale, colour_text_top_to_bottom_angle, font_thickness)
     return image
 
+def screenprint_top_to_bottom_angle_simple(image, top_to_bottom_angle):
+    image = cv2.putText(image, f'top_to_bottom_angle: {str(round(top_to_bottom_angle,3))} [degrees]', (int(x_position_0),int(y_position_v[0])), cv2.FONT_HERSHEY_PLAIN, font_scale, colour_text, font_thickness)
+    return image
+
 def screenprint_left_to_right_angle(image, left_to_right_angle, left_to_right_angle_ref, left_to_right_angle_max_deviation_perc):
     if abs(left_to_right_angle - left_to_right_angle_ref) < left_to_right_angle_max_deviation_perc:
         colour_text_left_to_right_angle = colour_text_valid
     else:
         colour_text_left_to_right_angle = colour_text_invalid
     image = cv2.putText(image, f'left_to_right_angle: {str(round(left_to_right_angle,3))} [degrees]', (x_position_0,int(y_position_v[1])), cv2.FONT_HERSHEY_PLAIN, font_scale, colour_text_left_to_right_angle, font_thickness)
+    return image
+
+def screenprint_left_to_right_angle_simple(image, left_to_right_angle):
+    image = cv2.putText(image, f'left_to_right_angle: {str(round(left_to_right_angle,3))} [degrees]', (x_position_0,int(y_position_v[1])), cv2.FONT_HERSHEY_PLAIN, font_scale, colour_text, font_thickness)
     return image
 
 def screenprint_ipd_px(image, ipd_px):
@@ -361,6 +365,10 @@ def screenprint_area_right_to_left_silhoutte(image, area_right_to_left_silhoutte
     else:
         colour_text_area_right_to_left_silhoutte = colour_text_invalid
     image = cv2.putText(image, f'area_right_to_left_silhoutte: {str(round(area_right_to_left_silhoutte,3))} [%]', (x_position_0,int(y_position_v[3])), cv2.FONT_HERSHEY_PLAIN, font_scale,colour_text_area_right_to_left_silhoutte, font_thickness)
+    return image
+
+def screenprint_area_right_to_left_silhoutte_simple(image, area_right_to_left_silhoutte):
+    image = cv2.putText(image, f'area_right_to_left_silhoutte: {str(round(area_right_to_left_silhoutte,3))} [%]', (x_position_0,int(y_position_v[3])), cv2.FONT_HERSHEY_PLAIN, font_scale,colour_text, font_thickness)
     return image
 
 def screenprint_nose_to_cheek(image,left_cheek_to_nose_angle,nose_to_right_cheek_angle):
@@ -384,17 +392,13 @@ def process_image(image, landmarks, top_to_bottom_angle_ref, top_to_bottom_angle
     font_scale, font_thickness, line_width, point_width, thickness_oval, x_position_0, y_position_v = put_text_args(height, width, n_lines, scale)
     # Getting face lanmarks + iris position
     result, mesh_points = face_mesh_points(image)
-    
-
     if result is None:
         return image_bgr_to_rgb(image)
-    
-    
     iris_position, iris_radius = find_iris_location(mesh_points,landmarks)
     # Measuring properties
     ipd_px = get_ipd_px(iris_position)
     width_face_px, height_face_px = get_face_dimensions_px(mesh_points, landmarks)
-        # distance_camera_to_face = distance_camera_to_face_calculator(focal_length, real_face_width, width_face_px)
+    # distance_camera_to_face = distance_camera_to_face_calculator(focal_length, real_face_width, width_face_px)
     top_to_bottom_angle = get_top_to_bottom_angle(mesh_points, landmarks)
     left_to_right_angle = get_left_to_right_angle(mesh_points, landmarks)
     left_cheek_to_nose_angle = get_left_cheek_to_nose_angle(mesh_points, landmarks)
@@ -403,7 +407,7 @@ def process_image(image, landmarks, top_to_bottom_angle_ref, top_to_bottom_angle
     area_px_right_silhoutte = area_px_right_silhoutte_calc(mesh_points, landmarks)
     area_right_to_left_silhoutte = (1 - (area_px_right_silhoutte/area_px_left_silhoutte))*100
     # Printing objects
-    # image = print_face_mesh_image(image, result)
+    image = print_face_mesh_image(image, result)
     image = print_iris_location(image, mesh_points, landmarks)
     image = print_center_iris(image, iris_position)
     image = print_line_left_to_right_iris(image, iris_position)
@@ -417,7 +421,6 @@ def process_image(image, landmarks, top_to_bottom_angle_ref, top_to_bottom_angle
     image = print_left_silhouette(image, mesh_points, landmarks)
     image = print_face_oval(image)
     # Screenprinting data and checks
-    # 
     image = screenprint_top_to_bottom_angle(image, top_to_bottom_angle, top_to_bottom_angle_ref, top_to_bottom_angle_max_deviation)
     image = screenprint_left_to_right_angle(image, left_to_right_angle, left_to_right_angle_ref, left_to_right_angle_max_deviation_perc)
     image = screenprint_area_right_to_left_silhoutte(image, area_right_to_left_silhoutte, area_ratio_right_to_left_ref, area_ratio_right_to_left_max_deviation_perc)
@@ -425,3 +428,58 @@ def process_image(image, landmarks, top_to_bottom_angle_ref, top_to_bottom_angle
     image = screenprint_nose_to_cheek(image,left_cheek_to_nose_angle,nose_to_right_cheek_angle)
     # 
     return image_bgr_to_rgb(image)
+
+# ---------------------------------
+# MAIN MEASURING FUNCTION
+# ---------------------------------
+
+def measure_image(image, landmarks):
+    # 
+    try:
+        image = image_bgr_to_rgb(image)
+    except Exception as e: print(e)
+    # Properties of lines
+    global font_scale, font_thickness, line_width, point_width, thickness_oval, x_position_0, y_position_v
+    n_lines = 5
+    scale = 1
+    height, width = height_width_image(image)
+    font_scale, font_thickness, line_width, point_width, thickness_oval, x_position_0, y_position_v = put_text_args(height, width, n_lines, scale)
+    # Getting face lanmarks
+    result, mesh_points = face_mesh_points(image)
+    if result == None or width < 1000: # Exit the function if result = None or low-resolution
+        return image, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
+    # Getting Iris position
+    iris_position, iris_radius = find_iris_location(mesh_points,landmarks)
+    # Measuring properties
+    ipd_px = get_ipd_px(iris_position)
+    width_face_px, height_face_px = get_face_dimensions_px(mesh_points, landmarks)
+    top_to_bottom_angle = get_top_to_bottom_angle(mesh_points, landmarks)
+    left_to_right_angle = get_left_to_right_angle(mesh_points, landmarks)
+    left_cheek_to_nose_angle = get_left_cheek_to_nose_angle(mesh_points, landmarks)
+    nose_to_right_cheek_angle = get_nose_to_right_cheek_angle(mesh_points, landmarks)
+    area_px_left_silhoutte = area_px_left_silhoutte_calc(mesh_points, landmarks)
+    area_px_right_silhoutte = area_px_right_silhoutte_calc(mesh_points, landmarks)
+    area_right_to_left_silhoutte = (1 - (area_px_right_silhoutte/area_px_left_silhoutte))*100
+    # Printing objects
+    image = print_face_mesh_image(image, result)
+    image = print_iris_location(image, mesh_points, landmarks)
+    image = print_center_iris(image, iris_position)
+    image = print_line_left_to_right_iris(image, iris_position)
+    image = print_line_top_to_bottom(image, mesh_points, landmarks)
+    image = print_line_left_to_right(image, mesh_points, landmarks)
+    image = print_line_left_cheek_to_nose(image, mesh_points, landmarks)
+    image = print_line_nose_to_right_cheek(image, mesh_points, landmarks)
+    image = print_silhouette(image, mesh_points, landmarks)
+    # image = print_rectangle_card_area(image, mesh_points, landmarks)
+    image = print_right_silhouette(image, mesh_points, landmarks)
+    image = print_left_silhouette(image, mesh_points, landmarks)
+    # image = print_face_oval(image)
+    # Screenprinting data and checks
+    image = screenprint_top_to_bottom_angle_simple(image, top_to_bottom_angle)
+    image = screenprint_left_to_right_angle_simple(image, left_to_right_angle)
+    image = screenprint_area_right_to_left_silhoutte_simple(image, area_right_to_left_silhoutte)
+    image = screenprint_ipd_px(image, ipd_px)
+    image = screenprint_nose_to_cheek(image,left_cheek_to_nose_angle,nose_to_right_cheek_angle)
+    # 
+    image = image_bgr_to_rgb(image)
+    return image, ipd_px, width_face_px, height_face_px, top_to_bottom_angle, left_to_right_angle, left_cheek_to_nose_angle, nose_to_right_cheek_angle, area_px_left_silhoutte, area_px_right_silhoutte, area_right_to_left_silhoutte
