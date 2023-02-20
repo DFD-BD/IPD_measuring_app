@@ -1,5 +1,11 @@
 # User defined folder/files
-photos/
+photos/BAD/
+photos/GOOD/
+photos/BAD/*
+photos/GOOD/*
+photos/output/processed_images/*
+photos/output/processed_images.zip
+photos/output/plots.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

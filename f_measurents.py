@@ -449,7 +449,7 @@ def measure_image(image, landmarks):
     if result == None or width < 1000: # Exit the function if result = None or low-resolution
         return image, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan
     # Getting Iris position
-    iris_position, iris_radius = find_iris_location(mesh_points,landmarks)
+    iris_position, iris_radius = find_iris_location(mfesh_points,landmarks)
     # Measuring properties
     ipd_px = get_ipd_px(iris_position)
     width_face_px, height_face_px = get_face_dimensions_px(mesh_points, landmarks)
